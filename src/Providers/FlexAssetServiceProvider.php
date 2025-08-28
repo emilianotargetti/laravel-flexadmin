@@ -31,22 +31,57 @@ class FlexAssetServiceProvider extends ServiceProvider
             __DIR__.'/../../config/flexasset.php' => config_path('flexasset.php'),
         ], 'flexasset-config');
 
-        Blade::directive('styles', function(){
+        // Styles directive
+        Blade::directive('styles', function ($area) {
             $output = '';
-            foreach(FlexAsset::getCss() as $css){
-                $output .= '<link rel="stylesheet" href="'. $css .'">' . PHP_EOL;
+            $area = trim($area, "'");
+
+            // Aggiungi i file CSS
+            foreach (FlexAsset::getCss($area) as $css) {
+                $output .= '<link rel="stylesheet" href="' . $css . '">' . PHP_EOL;
             }
 
-            return $output ;
+            // Aggiungi gli stili inline
+            $inlineCss = trim(join(PHP_EOL, FlexAsset::getInlineCss($area)));
+
+            if (!empty($inlineCss)) {
+                $output .= PHP_EOL . '<style>' . PHP_EOL . $inlineCss . PHP_EOL . '</style>' . PHP_EOL;
+            }
+
+            // Stampa gli errori se presenti
+            $errors = FlexAsset::getErrors('css');
+            if (!empty($errors)) {
+                $output .= '<!-- File not found: ' . join(PHP_EOL, $errors) . ' -->' . PHP_EOL;
+            }
+
+            // Restituisce il markup corretto
+            return $output;
         });
 
-        Blade::directive('scripts', function(){
+        // Scripts directive
+        Blade::directive('scripts', function ($area) {
+            $area = trim($area, "'");
             $output = '';
-            foreach(FlexAsset::getJs() as $js){
-                $output .= '<script src="'. $js .'"></script>' . PHP_EOL;
+
+            // Aggiungi i file JavaScript
+            foreach (FlexAsset::getJs($area) as $js) {
+                $output .= '<script type="text/javascript" src="' . $js . '"></script>' . PHP_EOL;
             }
 
-            return $output ;
+            // Aggiungi gli script inline
+            $inlineJs = trim(join(PHP_EOL, FlexAsset::getInlineJs($area)));
+            if (!empty($inlineJs)) {
+                $output .= PHP_EOL . '<script type="text/javascript">' . PHP_EOL . $inlineJs . PHP_EOL . '</script>' . PHP_EOL;
+            }
+
+            // Stampa gli errori se presenti
+            $errors = FlexAsset::getErrors('js');
+            if (!empty($errors)) {
+                $output .= '<!-- File not found: ' . join(PHP_EOL, $errors) . ' -->' . PHP_EOL;
+            }
+
+            // Restituisce il markup corretto
+            return $output;
         });
 
     }

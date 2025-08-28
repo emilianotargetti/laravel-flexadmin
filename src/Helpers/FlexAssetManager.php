@@ -1,7 +1,5 @@
 <?php
 
-// File: emilianotargetti//flexasset/src/Helpers/FlexAssetManager.php
-
 namespace EmilianoTargetti\FlexAsset\Helpers;
 
 use Illuminate\Support\Facades\Validator;
@@ -49,11 +47,38 @@ class FlexAssetManager
     ];
 
     /**
+     * Un array associativo per memorizzare i blocchi di codice CSS inline.
+     * I blocchi sono raggruppati per area.
+     *
+     * @var array
+     */
+    protected $inlineCss = [
+        'common' => [],
+        'default' => [],
+        'admin' => [],
+    ];
+
+    /**
+     * Un array associativo per memorizzare i blocchi di codice JavaScript inline.
+     * I blocchi sono raggruppati per area.
+     *
+     * @var array
+     */
+    protected $inlineJs = [
+        'common' => [],
+        'default' => [],
+        'admin' => [],
+    ];
+
+    /**
      * Un array per memorizzare i percorsi degli asset non trovati.
      *
      * @var array
      */
-    protected $errors = [];
+    protected $errors = [
+        'css' =>[],
+        'js' =>[],
+    ];
 
     /**
      * Costruttore della classe.
@@ -103,7 +128,7 @@ class FlexAssetManager
                 if (file_exists($fullPath)) {
                     $path = asset($this->basePath . '/' . $path);
                 } else {
-                    $this->errors[] = $path;
+                    $this->errors['css'][] = $path;
                     $path = null;
                 }
             }
@@ -137,7 +162,7 @@ class FlexAssetManager
                 if (file_exists($fullPath)) {
                     $path = asset($this->basePath . '/' . $path);
                 } else {
-                    $this->errors[] = $path;
+                    $this->errors['js'][]  = $path;
                     $path = null;
                 }
             }
@@ -145,6 +170,52 @@ class FlexAssetManager
             if (!is_null($path) && !in_array($path, $this->js[$area])) {
                 $this->js[$area][] = $path;
             }
+        }
+    }
+
+    /**
+     * Aggiunge un blocco di codice CSS inline.
+     *
+     * L'utente è responsabile della correttezza del codice CSS, poiché non
+     * vengono eseguiti controlli di validazione per non appesantire le performance.
+     *
+     * @param string $code Il codice CSS da aggiungere.
+     * @param string $area L'area di destinazione per l'asset inline.
+     * @return void
+     */
+    public function addInlineCss(string $code, string $area = 'default'): void
+    {
+        $area = !empty(trim($area)) && strlen(trim($area) > 0) ? trim($area) : 'default';
+
+        if (!isset($this->inlineCss[$area])) {
+            $this->inlineCss[$area] = [];
+        }
+
+        if (!empty(trim($code))) {
+            $this->inlineCss[$area][] = trim($code);
+        }
+    }
+
+    /**
+     * Aggiunge un blocco di codice JavaScript inline.
+     *
+     * L'utente è responsabile della correttezza del codice JS, poiché non
+     * vengono eseguiti controlli di validazione per non appesantire le performance.
+     *
+     * @param string $code Il codice JavaScript da aggiungere.
+     * @param string $area L'area di destinazione per l'asset inline.
+     * @return void
+     */
+    public function addInlineJs(string $code, string $area = 'default'): void
+    {
+        $area = !empty(trim($area)) && strlen(trim($area) > 0) ? trim($area) : 'default';
+
+        if (!isset($this->inlineJs[$area])) {
+            $this->inlineJs[$area] = [];
+        }
+
+        if (!empty(trim($code))) {
+            $this->inlineJs[$area][] = trim($code);
         }
     }
 
@@ -195,12 +266,73 @@ class FlexAssetManager
     }
 
     /**
+     * Restituisce l'array dei blocchi di codice CSS inline per l'area specificata.
+     * Per le aree 'default' e 'admin', vengono uniti anche gli asset dell'area 'common'.
+     *
+     * @param string $area L'area da cui recuperare gli asset inline.
+     * @return array
+     */
+    public function getInlineCss($area = 'default'): array
+    {
+        $aree = array_keys(config('flexasset.aree', []));
+        $area = !empty(trim($area)) && strlen(trim($area) > 0) ? trim($area) : null;
+
+        if (!is_null($area) && in_array($area, ['default', 'admin'])) {
+            return array_merge($this->inlineCss['common'], $this->inlineCss[$area]);
+        }
+
+        if (!is_null($area) && in_array($area, $aree)) {
+            return $this->inlineCss[$area];
+        }
+
+        return [];
+    }
+
+    /**
+     * Restituisce l'array dei blocchi di codice JavaScript inline per l'area specificata.
+     * Per le aree 'default' e 'admin', vengono uniti anche gli asset dell'area 'common'.
+     *
+     * @param string $area L'area da cui recuperare gli asset inline.
+     * @return array
+     */
+    public function getInlineJs($area = 'default'): array
+    {
+        $aree = array_keys(config('flexasset.aree', []));
+        $area = !empty(trim($area)) && strlen(trim($area) > 0) ? trim($area) : null;
+
+        if (!is_null($area) && in_array($area, ['default', 'admin'])) {
+            return array_merge($this->inlineJs['common'], $this->inlineJs[$area]);
+        }
+
+        if (!is_null($area) && in_array($area, $aree)) {
+            return $this->inlineJs[$area];
+        }
+
+        return [];
+    }
+
+    /**
      * Restituisce un array contenente i percorsi degli asset non trovati.
      *
      * @return array
      */
-    public function getErrors(): array
+    public function getErrors($type = null): array
     {
+        switch ($type) {
+            case 'css':
+                return $this->errors['css'];
+                break;
+
+
+            case 'js':
+                return $this->errors['js'];
+                break;
+
+            default:
+                return $this->errors;
+                break;
+        }
+
         return $this->errors;
     }
 

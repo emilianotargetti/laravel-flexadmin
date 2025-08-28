@@ -1,0 +1,31 @@
+{
+    "name": "emilianotargetti/flexasset",
+    "description": "A dynamic asset management package for Laravel, inspired by FuelPHP's Asset class.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Emiliano Targetti",
+            "email": "emiliano.targetti@example.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "EmilianoTargetti\\FlexAsset\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "EmilianoTargetti\\FlexAsset\\Providers\\FlexAssetServiceProvider"
+            ],
+            "aliases": {
+                "FlexAsset": "EmilianoTargetti\\FlexAsset\\Facades\\FlexAsset"
+            }
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0"
+    }
+}

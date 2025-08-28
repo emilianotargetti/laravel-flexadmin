@@ -1,7 +1,12 @@
 # laravel-flexadmin
 A Laravel package for dynamic asset management, inspired by FuelPHP's Asset class. It allows you to add and group CSS and JS files by area, ensuring a clean, flexible, and organized approach to managing your web assets.
 
+laravel-flexadmin
+
+A Laravel package for dynamic asset management, inspired by FuelPHP's Asset class. It allows you to add and group CSS and JS files by area, ensuring a clean, flexible, and organized approach to managing your web assets.
+
 FlexAsset: Gestore di Asset per Laravel
+
 FlexAsset è un pacchetto per Laravel che offre una soluzione flessibile e potente per la gestione degli asset (CSS e JavaScript). Ispirato alla classe Asset di FuelPHP, permette di aggiungere, raggruppare e rendere gli asset in modo dinamico, con supporto per diverse "aree" dell'applicazione come default, admin e altre personalizzate.
 
 Caratteristiche Principali
